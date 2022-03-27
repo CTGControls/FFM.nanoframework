@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32314.265
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "FFM.nanoframework.ad4116", "FFM.nanoframework.ad4116\FFM.nanoframework.ad4116.nfproj", "{B15AECC7-7E70-422F-924B-91B1D723D196}"
+EndProject
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "FFM.nanoframework.ESP32", "FFM.nanoframework.ESP32\FFM.nanoframework.ESP32.nfproj", "{4235746A-677D-4D3A-83F2-E6981E6A4280}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B15AECC7-7E70-422F-924B-91B1D723D196}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4235746A-677D-4D3A-83F2-E6981E6A4280}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3AC8114-C34D-4B4C-85A5-85ACDFA192B8}
+	EndGlobalSection
+EndGlobal
