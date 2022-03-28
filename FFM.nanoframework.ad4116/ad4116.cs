@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Device.Spi;
+using System.Diagnostics;
 using System.Threading;
 using FFM.nanoframework.ad4116;
 
@@ -8,16 +9,20 @@ namespace FFM.nanoframework
     public class AD4116
     {
 
-        private readonly ushort read_write_delay = 50;
+        private readonly ushort read_write_delay = 150;
 
         private data_mode_t m_data_mode;
         private bool append_status_reg;
         public SpiDevice _spiDevice;
 
+        public bool _DEBUG_ENABLED;
 
-        public AD4116(SpiDevice spiDevice)
+
+        public AD4116(SpiDevice spiDevice, bool DEBUG_ENABLED)
         {
             _spiDevice = spiDevice;
+            _DEBUG_ENABLED = DEBUG_ENABLED;
+
         }
 
         public void reset()
@@ -26,6 +31,8 @@ namespace FFM.nanoframework
             {
                 _spiDevice.WriteByte(0xFF);
             }
+
+            _spiDevice.Write(new byte[8] {0xFF , 0xFF , 0xFF , 0xFF , 0xFF , 0xFF , 0xFF , 0xFF});
 
             Thread.Sleep(read_write_delay);
 
@@ -45,7 +52,7 @@ namespace FFM.nanoframework
             // clean up the communication register by sending 0x00 
             _spiDevice.WriteByte(0x00);
 
-            Thread.Sleep(5);
+            Thread.Sleep(150);
 
             // send communication register the read command and the address to read
             SpanByte writeBuffer = new byte[1] { (byte)(0x40 | registerAddress) };
@@ -53,25 +60,69 @@ namespace FFM.nanoframework
 
             // send communication register the read command and the address to read
             // then read back the results
-            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
+            //_spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
+
+            _spiDevice.Write(writeBuffer);
+
+            _spiDevice.Read(readBuffer);
+
+            if (_DEBUG_ENABLED)
+            {
+
+                Debug.Write("get_register: got [");
+
+                for (int i = 1; i < readBuffer.Length; i++)
+                {
+                    if (readBuffer[i] < 15) Debug.Write("0");
+                    Debug.Write(readBuffer[i].ToString("X"));
+                }
+
+                Debug.Write("] from reg [");
+                Debug.Write(registerAddress.ToString("X"));
+                Debug.WriteLine("]");
+
+            }
 
             Thread.Sleep(read_write_delay);
             // Cean up the data by removing the first byte
             return readBuffer.Slice(1);
         }
 
-        public void set_register(SpanByte writeData)
+        public void set_register(SpanByte writeBuffer)
         {
 
             // clean up the communication register by sending 0x00 
             _spiDevice.WriteByte(0x00);
-            Thread.Sleep(5);
+
+            SpanByte readBuffer = new byte[writeBuffer.Length];
+
+            // send communication register the read command and the address to read
+            // then read back the results
+            _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
+
 
             // Write the requested data to the controller
             // First byte is the address 
-            _spiDevice.Write(writeData);
+            _spiDevice.Write(writeBuffer);
 
-            Thread.Sleep(read_write_delay);
+            if (_DEBUG_ENABLED)
+            {
+
+                Debug.Write("set_register: set [");
+
+                for (int i = 1; i < writeBuffer.Length; i++)
+                {
+                    if (writeBuffer[i] < 15) Debug.Write("0");
+                    Debug.Write(writeBuffer[i].ToString("x"));
+                }
+
+                Debug.Write("] to reg [");
+                Debug.Write(writeBuffer[0].ToString("x"));
+                Debug.WriteLine("]");
+
+            }
+
+                Thread.Sleep(read_write_delay);
 
         }
 
@@ -101,15 +152,24 @@ namespace FFM.nanoframework
             SpanByte writeData = new byte[3] { 0x00, 0x00, 0x00 };
 
             writeData[0] = (byte)ad4116_register_t.IFMODE_REG;
+
+            int writeData2 = 0;
             if (continuous_read)
             {
-                writeData[2] = (byte)(writeData[2] | (1 << 7));
+                writeData2 = (1 << 7);
             }
+
+            Debug.WriteLine($"writeData2 = {writeData2.ToString("x")}");
 
             if (append_status_reg)
             {
-                writeData[2] = (byte)(writeData[2] | (1 << 6));
+                writeData2 = writeData2 | (1 << 6);
             }
+
+            Debug.WriteLine($"writeData2 = {writeData2.ToString("x")}");
+
+            writeData[2] = ((byte)writeData2);
+            Debug.WriteLine($"writeData[2] = {writeData[2].ToString("x")}");
 
             /* update the configuration value */
             set_register(writeData);
@@ -195,7 +255,7 @@ namespace FFM.nanoframework
             set_register(writeBuffer);
 
             /* verify the updated configuration value */
-            //get_register((byte)channel, 2);
+            get_register((byte)channel, 2);
 
             /* return error code */
             return 0;
@@ -234,23 +294,23 @@ namespace FFM.nanoframework
 
         }
 
-        public int set_offset_config(ad4116_register_t offset, UInt32 offset_value)
+        public int set_offset_config(ad4116_register_t offset_reg, UInt32 offset_value)
         {
 
-            /* add the default offset value */
-            offset_value += 8388608;
+            /* add the default offset value DEC 8388608*/
+            var offset = offset_value + 0x80000;
             /* prepare the configuration value */
-            SpanByte writeBuffer = new byte[4] { (byte)offset, 0x00, 0x00, 0x00 };
+            SpanByte writeBuffer = new byte[4] { (byte)offset_reg, 0x80, 0x00, 0x01 };
 
-            writeBuffer[1] = (byte)(((byte)offset_value) >> 16);
-            writeBuffer[2] = (byte)(((byte)offset_value) >> 8);
-            writeBuffer[3] = (byte)offset_value;
+            //writeBuffer[1] = (byte)(((byte)offset_value) >> 16);
+            //writeBuffer[2] = (byte)(((byte)offset_value) >> 8);
+            //writeBuffer[3] = (byte)offset_value;
 
             /* update the configuration value */
             set_register(writeBuffer);
 
             /* verify the updated configuration value */
-            get_register((byte)offset, 2);
+            get_register((byte)offset_reg, 3);
 
             /* return error code */
             return 0;
