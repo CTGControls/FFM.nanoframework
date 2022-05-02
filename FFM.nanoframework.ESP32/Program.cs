@@ -3,6 +3,8 @@ using System.Device.Spi;
 using System.Diagnostics;
 using System.Threading;
 using FFM.nanoframework.ad4116;
+using nanoFramework.Hardware.Esp32;
+using System.Device.Gpio;
 
 namespace FFM.nanoframework.ESP32
 {
@@ -10,17 +12,32 @@ namespace FFM.nanoframework.ESP32
     {
         public static void Main()
         {
+
             SpiDevice spiDevice;
             SpiConnectionSettings connectionSettings;
+
+            GpioController gpioController = new GpioController();
+
+            Configuration.SetPinFunction(35, DeviceFunction.SPI1_MOSI);
+            Configuration.SetPinFunction(36, DeviceFunction.SPI1_CLOCK);
+            Configuration.SetPinFunction(37, DeviceFunction.SPI1_MISO);
+            //var chipSelectLine = gpioController.OpenPin(10, PinMode.Output);
+            
+            //Configuration.SetPinFunction(37, DeviceFunction.);
 
             SpiBusInfo spiBusInfo = SpiDevice.GetBusInfo(1);
             Debug.WriteLine($"{nameof(spiBusInfo.MaxClockFrequency)}: {spiBusInfo.MaxClockFrequency}"); //40000000
             Debug.WriteLine($"{nameof(spiBusInfo.MinClockFrequency)}: {spiBusInfo.MinClockFrequency}"); //78125
 
-            connectionSettings = new SpiConnectionSettings(1, 14)
+            //if (gpioController.GetPinMode(14) == PinMode.Output)
+            //{
+            //    gpioController.ClosePin(14);
+            //}
+            
+            connectionSettings = new SpiConnectionSettings(1 , 10)
             {
-                ClockFrequency = 12000,
-                ChipSelectLine = 14,
+                ClockFrequency = 4000000,
+                ChipSelectLine = 10,
                 ChipSelectLineActiveState = false,
                 BusId = 1,
                 DataBitLength = 8,
@@ -31,12 +48,18 @@ namespace FFM.nanoframework.ESP32
 
             spiDevice = SpiDevice.Create(connectionSettings);
 
+            Thread.Sleep(10);
             AD4116 ad4116 = new AD4116(spiDevice, true);
 
 
             ad4116.reset();
 
             Thread.Sleep(10);
+
+            while (true)
+            {
+                var results = ad4116.get_register(0x7, 2);
+            }
 
             /* set ADC input channel configuration */
             /* enable channel 0 and channel 1 and connect each to 2 analog inputs for bipolar input */
@@ -86,7 +109,7 @@ namespace FFM.nanoframework.ESP32
             /* wait for ADC */
             Thread.Sleep(30000);
 
-            
+
 
 
             //SpanByte datax = new byte[2] { 0x00, 0x00 };
@@ -137,7 +160,7 @@ namespace FFM.nanoframework.ESP32
                 Debug.WriteLine($"{data[0].ToString("x")}{data[1].ToString("x")}");
 
 
-                
+
 
 
                 data = ad4116.get_register(0x04, 5);

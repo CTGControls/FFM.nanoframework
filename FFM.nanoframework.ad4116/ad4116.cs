@@ -3,6 +3,7 @@ using System.Device.Spi;
 using System.Diagnostics;
 using System.Threading;
 using FFM.nanoframework.ad4116;
+using System.Device.Gpio;
 
 namespace FFM.nanoframework
 {
@@ -49,6 +50,7 @@ namespace FFM.nanoframework
 
         public SpanByte get_register(byte registerAddress, byte numberOfBytes)
         {
+
             // clean up the communication register by sending 0x00 
             _spiDevice.WriteByte(0x00);
 
