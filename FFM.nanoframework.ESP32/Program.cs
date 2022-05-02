@@ -38,7 +38,7 @@ namespace FFM.nanoframework.ESP32
             {
                 ClockFrequency = 4000000,
                 ChipSelectLine = 10,
-                ChipSelectLineActiveState = false,
+                ChipSelectLineActiveState = PinValue.Low,
                 BusId = 1,
                 DataBitLength = 8,
                 Mode = SpiMode.Mode3,
